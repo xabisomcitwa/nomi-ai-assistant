@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { ToolHeader } from "../tool-header";
-import pulseMark from "@/assets/nexus-mark.png";
+import pulseMark from "@/assets/nomi-mark.png";
 
 const STARTERS = [
   "Help me say no to this meeting, kindly.",
@@ -47,10 +47,10 @@ export function Pulse() {
         icon={MessageCircleHeart}
         eyebrow="Pulse"
         title="A thoughtful colleague, always nearby"
-        description="Think out loud with Pulse. It can untangle a workplace situation, sharpen a prompt, or point you to the right Nexus Flow tool."
+        description="Think out loud with Pulse. It can untangle a workplace situation, sharpen a prompt, or point you to the right nomi tool."
       />
 
-      <div className="glass-panel flex h-[clamp(28rem,64vh,44rem)] flex-col rounded-2xl">
+      <div className="glass-panel flex h-[clamp(28rem,64vh,44rem)] flex-col rounded-3xl">
         <div ref={scrollRef} className="flex-1 space-y-5 overflow-y-auto px-5 py-6">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-5 text-center">
@@ -90,7 +90,7 @@ export function Pulse() {
                   className={isUser ? "flex justify-end" : "flex justify-start"}
                 >
                   {isUser ? (
-                    <div className="max-w-[85%] rounded-2xl rounded-br-md bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground shadow-glass">
+                    <div className="max-w-[85%] rounded-3xl rounded-br-md bg-primary px-4 py-2.5 text-sm leading-relaxed text-primary-foreground shadow-glass">
                       {text}
                     </div>
                   ) : (
