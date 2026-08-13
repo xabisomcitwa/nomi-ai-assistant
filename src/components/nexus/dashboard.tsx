@@ -95,7 +95,7 @@ export function NexusDashboard() {
     setMobileOpen(false);
   };
 
-  const activeItem = NAV.find((item) => item.id === active) ?? NAV[0];
+  const activeItem = NAV.find((item) => item.id === active)!;
 
   const railContent = (
     <>
