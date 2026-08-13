@@ -52,7 +52,7 @@ export function EmailComposer() {
       />
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
-        <div className="glass-panel space-y-5 rounded-2xl p-5">
+        <div className="glass-panel space-y-5 rounded-3xl p-5">
           <div className="space-y-2">
             <Label>Tone</Label>
             <div className="flex flex-wrap gap-2">
@@ -115,7 +115,7 @@ export function EmailComposer() {
             {isLoading ? "Composing…" : "Compose draft"}
           </Button>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Nexus Flow never sends anything for you. You stay the author.
+            nomi never sends anything for you. You stay the author.
           </p>
         </div>
 

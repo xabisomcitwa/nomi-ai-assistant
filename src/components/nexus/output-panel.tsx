@@ -44,7 +44,7 @@ export function OutputPanel({
   };
 
   return (
-    <section className={cn("glass-panel flex flex-col rounded-2xl", className)}>
+    <section className={cn("glass-panel flex flex-col rounded-3xl", className)}>
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-5 py-3.5">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold">{title}</h3>

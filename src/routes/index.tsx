@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { NexusDashboard } from "@/components/nexus/dashboard";
 
-const title = "Nexus Flow — Your calm AI workplace co-pilot";
+const title = "nomi — Your calm AI workplace co-pilot";
 const description =
   "One calm dashboard with AI email drafting, meeting recaps, energy-aware planning, research insights and Pulse, your workplace AI companion.";
 

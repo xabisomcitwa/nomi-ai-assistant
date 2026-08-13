@@ -80,7 +80,7 @@ export function FlowPlanner() {
       />
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
-        <div className="glass-panel space-y-5 rounded-2xl p-5">
+        <div className="glass-panel space-y-5 rounded-3xl p-5">
           <div className="space-y-2">
             <Label>Plan for</Label>
             <Pills options={HORIZONS} value={horizon} onChange={setHorizon} />
