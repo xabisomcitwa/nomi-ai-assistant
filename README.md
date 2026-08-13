@@ -1,8 +1,8 @@
 # nomi-ai-assistant
 
-Build a beautiful, modern, and emotionally intelligent AI productivity platform called “Nexus Flow” — a single, cohesive dashboard that feels like a calm co-pilot for knowledge workers.
+Build a beautiful, modern, and emotionally intelligent AI productivity platform called “Nomi” — a single, cohesive dashboard that feels like a calm co-pilot for knowledge workers.
 
-Nexus Flow is not just another AI tool collection. It is a unified workplace operating system that helps professionals reclaim focus, reduce cognitive load, and move through their day with clarity and intention.
+Nomi is not just another AI tool collection. It is a unified workplace operating system that helps professionals reclaim focus, reduce cognitive load, and move through their day with clarity and intention.
 
 Core Concept:
 “One calm dashboard. Multiple AI superpowers. Zero friction.”
