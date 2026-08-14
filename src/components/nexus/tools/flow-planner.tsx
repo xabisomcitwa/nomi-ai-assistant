@@ -47,7 +47,7 @@ function Pills<T extends string>({
   );
 }
 
-export function FlowPlanner({ seed }: { seed?: string }) {
+export function FlowPlanner({ seed }: { seed?: string | undefined }) {
   const plan = useServerFn(planFlow);
   const { output, setOutput, isLoading, error, run, regenerate, entryId, isFavorite, toggleFavorite } =
     useToolRun("planner");

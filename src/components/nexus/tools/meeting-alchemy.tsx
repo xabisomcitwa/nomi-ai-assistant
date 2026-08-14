@@ -10,7 +10,7 @@ import { OutputPanel } from "../output-panel";
 import { ToolHeader } from "../tool-header";
 import { useToolRun } from "../use-tool-run";
 
-export function MeetingAlchemy({ seed }: { seed?: string }) {
+export function MeetingAlchemy({ seed }: { seed?: string | undefined }) {
   const summarize = useServerFn(summarizeMeeting);
   const {
     output,

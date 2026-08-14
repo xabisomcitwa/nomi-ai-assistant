@@ -10,7 +10,7 @@ import { OutputPanel } from "../output-panel";
 import { ToolHeader } from "../tool-header";
 import { useToolRun } from "../use-tool-run";
 
-export function InsightEngine({ seed }: { seed?: string }) {
+export function InsightEngine({ seed }: { seed?: string | undefined }) {
   const insight = useServerFn(runInsight);
   const {
     output,

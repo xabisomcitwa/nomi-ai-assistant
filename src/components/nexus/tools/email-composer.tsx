@@ -14,7 +14,7 @@ import { useAuth, type Tone } from "@/lib/auth-context";
 
 const TONES: Tone[] = ["Formal", "Friendly", "Persuasive", "Empathetic"];
 
-export function EmailComposer({ seed }: { seed?: string }) {
+export function EmailComposer({ seed }: { seed?: string | undefined }) {
   const compose = useServerFn(composeEmail);
   const { profile, updateProfile } = useAuth();
   const run = useToolRun("email");
