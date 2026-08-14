@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Check, Copy, Loader2, Pencil, RefreshCw, Eye } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Heart,
+  Loader2,
+  Pencil,
+  RefreshCw,
+  Eye,
+  CloudOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
@@ -14,6 +23,11 @@ type OutputPanelProps = {
   isLoading: boolean;
   emptyHint: string;
   className?: string;
+  error?: string | null;
+  onRetry?: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  canFavorite?: boolean;
 };
 
 export function OutputPanel({
@@ -24,6 +38,11 @@ export function OutputPanel({
   isLoading,
   emptyHint,
   className,
+  error,
+  onRetry,
+  isFavorite = false,
+  onToggleFavorite,
+  canFavorite = false,
 }: OutputPanelProps) {
   const [editing, setEditing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -51,11 +70,30 @@ export function OutputPanel({
           {isLoading && (
             <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Loader2 className="size-3.5 animate-spin" />
-              thinking
+              Thinking with Nomi…
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5">
+          {canFavorite && (
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={!value}
+              onClick={onToggleFavorite}
+              className="gap-1.5"
+              aria-pressed={isFavorite}
+              aria-label={isFavorite ? "Remove from favourites" : "Save to favourites"}
+            >
+              <Heart
+                className={cn(
+                  "size-3.5 transition-transform duration-200",
+                  isFavorite && "scale-110 fill-primary text-primary",
+                )}
+              />
+              {isFavorite ? "Saved" : "Favourite"}
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -90,7 +128,31 @@ export function OutputPanel({
       </header>
 
       <div className="min-h-[18rem] flex-1 p-5">
-        {value ? (
+        {error ? (
+          <div className="flex h-full min-h-[16rem] animate-in fade-in flex-col items-center justify-center gap-3 text-center duration-300">
+            <span className="grid size-14 place-items-center rounded-3xl bg-primary/10 text-primary">
+              <CloudOff className="size-6" />
+            </span>
+            <h4 className="text-lg font-semibold">That didn't go through</h4>
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+              {error}
+            </p>
+            {onRetry && (
+              <Button onClick={onRetry} className="mt-1 gap-2 rounded-full px-6">
+                <RefreshCw className="size-4" />
+                Try again
+              </Button>
+            )}
+          </div>
+        ) : isLoading && !value ? (
+          <div className="flex h-full min-h-[16rem] flex-col items-center justify-center gap-3 text-center">
+            <Loader2 className="size-7 animate-spin text-primary" />
+            <p className="text-sm font-medium">Thinking with Nomi…</p>
+            <p className="max-w-xs text-xs text-muted-foreground">
+              Taking a calm moment to get this right for you.
+            </p>
+          </div>
+        ) : value ? (
           editing ? (
             <Textarea
               value={value}
@@ -98,7 +160,7 @@ export function OutputPanel({
               className="min-h-[26rem] resize-y border-border/60 bg-background/60 font-mono text-[13px] leading-relaxed"
             />
           ) : (
-            <div className="nexus-prose">
+            <div className="nexus-prose animate-in fade-in duration-300">
               <ReactMarkdown>{value}</ReactMarkdown>
             </div>
           )
