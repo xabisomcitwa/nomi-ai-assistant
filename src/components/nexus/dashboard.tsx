@@ -1,13 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import {
+  BookmarkCheck,
   CalendarClock,
   ChevronsLeft,
+  Heart,
+  History,
   LayoutDashboard,
+  Loader2,
   Mail,
   Menu,
   MessageCircleHeart,
   NotebookPen,
   Radar,
+  Settings2,
   ShieldCheck,
   X,
 } from "lucide-react";
@@ -20,10 +26,28 @@ import { MeetingAlchemy } from "./tools/meeting-alchemy";
 import { FlowPlanner } from "./tools/flow-planner";
 import { InsightEngine } from "./tools/insight-engine";
 import { Pulse } from "./tools/pulse";
+import { RecentView } from "./tools/recent";
+import { TemplatesView } from "./tools/templates";
+import { SettingsView } from "./tools/settings";
+import { useAuth } from "@/lib/auth-context";
+import { useHistory } from "@/lib/history";
+import type { Template } from "@/lib/templates";
 
-type ToolId = "overview" | "email" | "meeting" | "planner" | "insight" | "pulse";
+type ToolId =
+  | "overview"
+  | "email"
+  | "meeting"
+  | "planner"
+  | "insight"
+  | "pulse"
+  | "templates"
+  | "recent"
+  | "favorites"
+  | "settings";
 
-const NAV: { id: ToolId; label: string; hint: string; icon: LucideIcon }[] = [
+type NavItem = { id: ToolId; label: string; hint: string; icon: LucideIcon };
+
+const TOOLS: NavItem[] = [
   { id: "overview", label: "Today", hint: "Your calm starting point", icon: LayoutDashboard },
   { id: "email", label: "Email Composer", hint: "Say it well, first time", icon: Mail },
   { id: "meeting", label: "Meeting Alchemy", hint: "Notes into clarity", icon: NotebookPen },
@@ -32,7 +56,26 @@ const NAV: { id: ToolId; label: string; hint: string; icon: LucideIcon }[] = [
   { id: "pulse", label: "Pulse", hint: "Your AI colleague", icon: MessageCircleHeart },
 ];
 
-function Overview({ onOpen }: { onOpen: (id: ToolId) => void }) {
+const LIBRARY: NavItem[] = [
+  { id: "templates", label: "Saved Templates", hint: "Ready-made prompts", icon: BookmarkCheck },
+  { id: "recent", label: "Recent", hint: "Your history", icon: History },
+  { id: "favorites", label: "Favourites", hint: "Kept for later", icon: Heart },
+  { id: "settings", label: "Settings", hint: "Make it yours", icon: Settings2 },
+];
+
+const ALL_NAV = [...TOOLS, ...LIBRARY];
+
+function Overview({
+  name,
+  onOpen,
+}: {
+  name: string;
+  onOpen: (id: ToolId) => void;
+}) {
+  const { user } = useAuth();
+  const { entries } = useHistory(user?.id ?? null);
+  const recent = entries.slice(0, 3);
+
   return (
     <div className="space-y-8">
       <div className="space-y-3">
@@ -40,24 +83,23 @@ function Overview({ onOpen }: { onOpen: (id: ToolId) => void }) {
           nomi
         </p>
         <h1 className="max-w-3xl text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-          One calm dashboard.{" "}
-          <span className="text-gradient">Multiple AI superpowers.</span> Zero friction.
+          Welcome back, <span className="text-gradient">{name}</span>.
         </h1>
         <p className="max-w-2xl text-[0.95rem] leading-relaxed text-muted-foreground">
-          Everything you need to move through the day with intention — drafting, distilling,
-          planning, researching and thinking out loud. Pick a space to begin.
+          One calm dashboard, multiple AI superpowers, zero friction. Pick a space to
+          begin — everything you make is saved to your history automatically.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {NAV.filter((item) => item.id !== "overview").map((item) => (
+        {TOOLS.filter((item) => item.id !== "overview").map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => onOpen(item.id)}
             className="glass-panel group rounded-3xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
           >
-            <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+            <span className="grid size-10 place-items-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
               <item.icon className="size-5" />
             </span>
             <h2 className="mt-4 font-semibold">{item.label}</h2>
@@ -66,14 +108,38 @@ function Overview({ onOpen }: { onOpen: (id: ToolId) => void }) {
         ))}
       </div>
 
+      {recent.length > 0 && (
+        <section className="glass-panel rounded-3xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-semibold">Recent</h2>
+            <Button variant="ghost" size="sm" onClick={() => onOpen("recent")}>
+              View all
+            </Button>
+          </div>
+          <ul className="mt-3 space-y-2">
+            {recent.map((entry) => (
+              <li key={entry.id}>
+                <button
+                  type="button"
+                  onClick={() => onOpen("recent")}
+                  className="w-full truncate rounded-2xl px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-foreground"
+                >
+                  {entry.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="glass-panel flex flex-col gap-3 rounded-3xl p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-0.5 size-5 shrink-0 text-teal" />
           <div>
             <p className="text-sm font-medium">Human in the loop, always</p>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              nomi drafts and suggests; you decide. Nothing is sent, scheduled or
-              shared without you.
+              nomi drafts and suggests; you decide. Nothing is sent, scheduled or shared
+              without you.
             </p>
           </div>
         </div>
@@ -86,16 +152,76 @@ function Overview({ onOpen }: { onOpen: (id: ToolId) => void }) {
 }
 
 export function NexusDashboard() {
+  const navigate = useNavigate();
+  const { session, profile, loading, user } = useAuth();
   const [active, setActive] = useState<ToolId>("overview");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [seed, setSeed] = useState<{ tool: ToolId; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!loading && !session) void navigate({ to: "/auth" });
+  }, [loading, session, navigate]);
 
   const open = (id: ToolId) => {
     setActive(id);
+    setSeed(null);
     setMobileOpen(false);
   };
 
-  const activeItem = NAV.find((item) => item.id === active)!;
+  const useTemplate = (template: Template) => {
+    setSeed({ tool: template.tool, text: template.seed });
+    setActive(template.tool);
+    setMobileOpen(false);
+  };
+
+  const seedFor = (id: ToolId) => (seed?.tool === id ? seed.text : undefined);
+
+  const activeItem = ALL_NAV.find((item) => item.id === active)!;
+  const displayName = profile?.display_name || user?.email?.split("@")[0] || "there";
+  const initials = displayName.slice(0, 2).toUpperCase();
+
+  if (loading || !session) {
+    return (
+      <div className="nexus-aurora flex min-h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <Loader2 className="size-6 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Getting your workspace ready…</p>
+        </div>
+      </div>
+    );
+  }
+
+  const navGroup = (label: string, items: NavItem[]) => (
+    <div className="space-y-1">
+      {!collapsed && (
+        <p className="px-3 pb-1 pt-3 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          {label}
+        </p>
+      )}
+      {items.map((item) => {
+        const isActive = item.id === active;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => open(item.id)}
+            title={collapsed ? item.label : undefined}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition-all duration-200 hover:scale-[1.01]",
+              collapsed && "lg:justify-center lg:px-0",
+              isActive
+                ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-glass"
+                : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
+            )}
+          >
+            <item.icon className={cn("size-[1.15rem] shrink-0", isActive && "text-primary")} />
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   const railContent = (
     <>
@@ -111,37 +237,16 @@ export function NexusDashboard() {
         )}
       </div>
 
-      <nav className="flex-1 space-y-1 px-2">
-        {NAV.map((item) => {
-          const isActive = item.id === active;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => open(item.id)}
-              title={collapsed ? item.label : undefined}
-              className={cn(
-                "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition-all duration-200",
-                collapsed && "lg:justify-center lg:px-0",
-                isActive
-                  ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground shadow-glass"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground",
-              )}
-            >
-              <item.icon
-                className={cn("size-[1.15rem] shrink-0", isActive && "text-primary")}
-              />
-              {!collapsed && <span className="truncate">{item.label}</span>}
-            </button>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto px-2 pb-2">
+        {navGroup("Tools", TOOLS)}
+        {navGroup("Library", LIBRARY)}
       </nav>
 
       <div className="px-2 pb-4">
         <button
           type="button"
           onClick={() => setCollapsed((c) => !c)}
-          className="hidden w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground lg:flex"
+          className="hidden w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-sidebar-foreground lg:flex"
         >
           <ChevronsLeft
             className={cn("size-[1.15rem] transition-transform", collapsed && "rotate-180")}
@@ -210,36 +315,37 @@ export function NexusDashboard() {
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="hidden items-center gap-2 rounded-full border border-border/60 bg-background/50 px-3 py-1.5 text-xs text-muted-foreground sm:flex">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-teal opacity-70" />
-                  <span className="relative inline-flex size-2 rounded-full bg-teal" />
-                </span>
-                AI is assisting
+              <span className="hidden truncate text-sm text-muted-foreground sm:block">
+                Welcome back, <span className="font-medium text-foreground">{displayName}</span>
               </span>
-              <div
-                className="grid size-9 place-items-center rounded-full bg-primary/12 text-sm font-medium text-primary"
-                aria-label="Your profile"
+              <button
+                type="button"
+                onClick={() => open("settings")}
+                className="grid size-9 place-items-center rounded-full bg-primary/12 text-sm font-medium text-primary transition-transform duration-200 hover:scale-105"
+                aria-label="Open settings"
               >
-                XN
-              </div>
+                {initials}
+              </button>
             </div>
           </header>
 
           <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-            {active === "overview" && <Overview onOpen={open} />}
-            {active === "email" && <EmailComposer />}
-            {active === "meeting" && <MeetingAlchemy />}
-            {active === "planner" && <FlowPlanner />}
-            {active === "insight" && <InsightEngine />}
+            {active === "overview" && <Overview name={displayName} onOpen={open} />}
+            {active === "email" && <EmailComposer seed={seedFor("email")} />}
+            {active === "meeting" && <MeetingAlchemy seed={seedFor("meeting")} />}
+            {active === "planner" && <FlowPlanner seed={seedFor("planner")} />}
+            {active === "insight" && <InsightEngine seed={seedFor("insight")} />}
             {active === "pulse" && <Pulse />}
+            {active === "templates" && <TemplatesView onUse={useTemplate} />}
+            {active === "recent" && <RecentView />}
+            {active === "favorites" && <RecentView favoritesOnly />}
+            {active === "settings" && <SettingsView />}
           </main>
 
           <footer className="border-t border-border/60 px-4 py-6 sm:px-6 lg:px-8">
             <p className="mx-auto max-w-4xl text-center text-xs leading-relaxed text-muted-foreground">
               <span className="font-medium text-foreground">Responsible AI.</span> nomi
               produces suggestions generated by AI models. Outputs can be incomplete,
-
               outdated or wrong, and are never a substitute for your judgement or
               professional, legal, financial or HR advice. Always review before sending,
               sharing or acting — and avoid entering confidential or personal data you
