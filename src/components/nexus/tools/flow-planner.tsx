@@ -125,7 +125,7 @@ export function FlowPlanner({ seed }: { seed?: string }) {
             onClick={generate}
           >
             <Compass className="size-4" />
-            {isLoading ? "Shaping your day…" : `Build my ${horizon.toLowerCase()}`}
+            {isLoading ? "Thinking with Nomi…" : `Build my ${horizon.toLowerCase()}`}
           </Button>
           <p className="text-xs leading-relaxed text-muted-foreground">
             A proposed rhythm, not a rulebook. Move blocks around freely.
@@ -138,8 +138,14 @@ export function FlowPlanner({ seed }: { seed?: string }) {
           onChange={setOutput}
           onRegenerate={regenerate}
           isLoading={isLoading}
+          error={error}
+          onRetry={regenerate}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+          canFavorite={Boolean(entryId)}
           emptyHint="Add your tasks to see time blocks, a priority order, and what to defer or delegate."
         />
+
       </div>
     </div>
   );
