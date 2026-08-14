@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarClock, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
