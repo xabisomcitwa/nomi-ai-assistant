@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Radar, Telescope } from "lucide-react";
+import { Loader2, Radar, Telescope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,18 +10,37 @@ import { OutputPanel } from "../output-panel";
 import { ToolHeader } from "../tool-header";
 import { useToolRun } from "../use-tool-run";
 
-export function InsightEngine() {
+export function InsightEngine({ seed }: { seed?: string | undefined }) {
   const insight = useServerFn(runInsight);
-  const { output, setOutput, isLoading, run, regenerate } = useToolRun();
+  const {
+    output,
+    setOutput,
+    isLoading,
+    error,
+    run,
+    regenerate,
+    entryId,
+    isFavorite,
+    toggleFavorite,
+  } = useToolRun("insight");
   const [lens, setLens] = useState("");
-  const [material, setMaterial] = useState("");
+  const [material, setMaterial] = useState(seed ?? "");
+
+  useEffect(() => {
+    if (seed) setMaterial(seed);
+  }, [seed]);
 
   const generate = () => {
     if (!material.trim()) return;
-    void run(() =>
-      insight({
-        data: { lens: lens.trim(), material: material.trim(), nonce: Date.now() },
-      }),
+    void run(
+      () =>
+        insight({
+          data: { lens: lens.trim(), material: material.trim(), nonce: Date.now() },
+        }),
+      {
+        title: material.trim().slice(0, 60),
+        prompt: lens.trim() ? `Lens: ${lens.trim()}\n${material.trim()}` : material.trim(),
+      },
     );
   };
 
@@ -56,12 +75,16 @@ export function InsightEngine() {
             />
           </div>
           <Button
-            className="w-full gap-2"
+            className="w-full gap-2 transition-transform duration-200 hover:scale-[1.01]"
             disabled={!material.trim() || isLoading}
             onClick={generate}
           >
-            <Telescope className="size-4" />
-            {isLoading ? "Analysing…" : "Run analysis"}
+            {isLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Telescope className="size-4" />
+            )}
+            {isLoading ? "Thinking with Nomi…" : "Run analysis"}
           </Button>
           <p className="text-xs leading-relaxed text-muted-foreground">
             Insight Engine reasons over what you provide. Verify anything load-bearing
@@ -75,6 +98,11 @@ export function InsightEngine() {
           onChange={setOutput}
           onRegenerate={regenerate}
           isLoading={isLoading}
+          error={error}
+          onRetry={regenerate}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+          canFavorite={Boolean(entryId)}
           emptyHint="Paste material or ask a question to see a summary, key insights, recommendations, and risks."
         />
       </div>

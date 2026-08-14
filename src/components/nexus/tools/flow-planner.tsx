@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { CalendarClock, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,28 +47,39 @@ function Pills<T extends string>({
   );
 }
 
-export function FlowPlanner() {
+export function FlowPlanner({ seed }: { seed?: string | undefined }) {
   const plan = useServerFn(planFlow);
-  const { output, setOutput, isLoading, run, regenerate } = useToolRun();
+  const { output, setOutput, isLoading, error, run, regenerate, entryId, isFavorite, toggleFavorite } =
+    useToolRun("planner");
   const [horizon, setHorizon] = useState<Horizon>("Day");
   const [energy, setEnergy] = useState<Energy>("Morning peak");
   const [hours, setHours] = useState("09:00 – 17:30");
-  const [tasks, setTasks] = useState("");
+  const [tasks, setTasks] = useState(seed ?? "");
+
+  useEffect(() => {
+    if (seed) setTasks(seed);
+  }, [seed]);
 
   const generate = () => {
     if (!tasks.trim()) return;
-    void run(() =>
-      plan({
-        data: {
-          horizon,
-          energy,
-          hours: hours.trim(),
-          tasks: tasks.trim(),
-          nonce: Date.now(),
-        },
-      }),
+    void run(
+      () =>
+        plan({
+          data: {
+            horizon,
+            energy,
+            hours: hours.trim(),
+            tasks: tasks.trim(),
+            nonce: Date.now(),
+          },
+        }),
+      {
+        title: `${horizon} plan — ${tasks.trim().split("\n")[0]?.replace(/^[-*]\s*/, "") ?? ""}`,
+        prompt: `Horizon: ${horizon}\nEnergy: ${energy}\nHours: ${hours}\n${tasks.trim()}`,
+      },
     );
   };
+
 
   return (
     <div className="space-y-6">
@@ -114,7 +125,7 @@ export function FlowPlanner() {
             onClick={generate}
           >
             <Compass className="size-4" />
-            {isLoading ? "Shaping your day…" : `Build my ${horizon.toLowerCase()}`}
+            {isLoading ? "Thinking with Nomi…" : `Build my ${horizon.toLowerCase()}`}
           </Button>
           <p className="text-xs leading-relaxed text-muted-foreground">
             A proposed rhythm, not a rulebook. Move blocks around freely.
@@ -127,8 +138,14 @@ export function FlowPlanner() {
           onChange={setOutput}
           onRegenerate={regenerate}
           isLoading={isLoading}
+          error={error}
+          onRetry={regenerate}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+          canFavorite={Boolean(entryId)}
           emptyHint="Add your tasks to see time blocks, a priority order, and what to defer or delegate."
         />
+
       </div>
     </div>
   );
