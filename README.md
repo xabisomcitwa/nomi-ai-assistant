@@ -1,17 +1,17 @@
 # nomi-ai-assistant
 
-Build a beautiful, modern, and emotionally intelligent AI productivity platform called “Nomi” — a single, cohesive dashboard that feels like a calm co-pilot for knowledge workers.
+Nomi is a beautiful, modern, and emotionally intelligent AI productivity platform — a single, cohesive dashboard that feels like a calm co-pilot for knowledge workers.
 
 Nomi is not just another AI tool collection. It is a unified workplace operating system that helps professionals reclaim focus, reduce cognitive load, and move through their day with clarity and intention.
 
 Core Concept:
 “One calm dashboard. Multiple AI superpowers. Zero friction.”
 
-Required Features (must all live inside one seamless application):
+Features:
 
 1. Smart Email Composer
-   - Generate professional emails in Formal, Friendly, Persuasive, or Empathetic tones
-   - Allow users to paste context or key points
+   - Generates professional emails in Formal, Friendly, Persuasive, or Empathetic tones
+   - Allows users to paste context or key points
    - One-click rewrite + tone switcher
    - Editable output with “Copy” and “Regenerate” actions
 
@@ -42,20 +42,16 @@ Design & UX Requirements:
 - Collapsible left sidebar with icons + labels for each tool
 - Top bar with “Nexus Flow” logo, user avatar placeholder, and a subtle “AI is assisting” indicator
 - Fully responsive (desktop-first, but excellent on mobile)
-- Every AI output must be editable and have clear “Copy” + “Regenerate” buttons
+- Every AI output is editable and has a clear “Copy” + “Regenerate” buttons
 - Smooth micro-interactions and generous whitespace
 - Professional typography (Inter or similar)
 
 Important Guardrails:
-- Include a clear Responsible AI disclaimer at the bottom of the dashboard and inside each tool
-- Never claim the AI is 100% accurate — always frame outputs as “suggestions”
-- Use structured, high-quality system prompts under the hood for each feature
-- Keep the entire experience feeling calm, focused, and human — not chaotic or overwhelming
+- Includes a clear Responsible AI disclaimer at the bottom of the dashboard and inside each tool
 
 Overall Vibe:
 A sophisticated yet warm productivity sanctuary. The kind of tool that makes professionals feel lighter and more in control the moment they open it.
 
-Start by building the full dashboard shell with sidebar navigation and then implement the five AI tools one by one.
 
 This project was built with [Lovable](https://lovable.dev).
 
