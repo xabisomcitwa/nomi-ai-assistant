@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Mail, Wand2 } from "lucide-react";
+import { Loader2, Mail, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,36 +10,58 @@ import { OutputPanel } from "../output-panel";
 import { ToolHeader } from "../tool-header";
 import { useToolRun } from "../use-tool-run";
 import { cn } from "@/lib/utils";
+import { useAuth, type Tone } from "@/lib/auth-context";
 
-const TONES = ["Formal", "Friendly", "Persuasive", "Empathetic"] as const;
-type Tone = (typeof TONES)[number];
+const TONES: Tone[] = ["Formal", "Friendly", "Persuasive", "Empathetic"];
 
-export function EmailComposer() {
+export function EmailComposer({ seed }: { seed?: string }) {
   const compose = useServerFn(composeEmail);
-  const { output, setOutput, isLoading, run, regenerate } = useToolRun();
-  const [tone, setTone] = useState<Tone>("Friendly");
+  const { profile, updateProfile } = useAuth();
+  const run = useToolRun("email");
+  const [tone, setTone] = useState<Tone>(profile?.preferred_tone ?? "Friendly");
   const [recipient, setRecipient] = useState("");
   const [goal, setGoal] = useState("");
-  const [context, setContext] = useState("");
+  const [context, setContext] = useState(seed ?? "");
+
+  useEffect(() => {
+    if (profile?.preferred_tone) setTone(profile.preferred_tone);
+  }, [profile?.preferred_tone]);
+
+  useEffect(() => {
+    if (seed) setContext(seed);
+  }, [seed]);
 
   const generate = (nextTone: Tone = tone) => {
     if (!context.trim()) return;
-    void run(() =>
-      compose({
-        data: {
-          tone: nextTone,
-          recipient: recipient.trim(),
-          goal: goal.trim(),
-          context: context.trim(),
-          nonce: Date.now(),
-        },
-      }),
+    void run.run(
+      () =>
+        compose({
+          data: {
+            tone: nextTone,
+            recipient: recipient.trim(),
+            goal: goal.trim(),
+            context: context.trim(),
+            nonce: Date.now(),
+          },
+        }),
+      {
+        title: goal.trim() || recipient.trim() || context.trim().slice(0, 60),
+        prompt: [
+          `Tone: ${nextTone}`,
+          recipient.trim() && `To: ${recipient.trim()}`,
+          goal.trim() && `Goal: ${goal.trim()}`,
+          context.trim(),
+        ]
+          .filter(Boolean)
+          .join("\n"),
+      },
     );
   };
 
   const switchTone = (next: Tone) => {
     setTone(next);
-    if (output || context.trim()) generate(next);
+    void updateProfile({ preferred_tone: next });
+    if (run.output || context.trim()) generate(next);
   };
 
   return (
@@ -62,7 +84,7 @@ export function EmailComposer() {
                   type="button"
                   onClick={() => switchTone(t)}
                   className={cn(
-                    "rounded-full border px-3.5 py-1.5 text-sm transition-all duration-200",
+                    "rounded-full border px-3.5 py-1.5 text-sm transition-all duration-200 hover:scale-[1.03]",
                     tone === t
                       ? "border-transparent bg-primary text-primary-foreground shadow-glass"
                       : "border-border/70 bg-background/50 text-muted-foreground hover:border-primary/40 hover:text-foreground",
@@ -72,6 +94,9 @@ export function EmailComposer() {
                 </button>
               ))}
             </div>
+            <p className="text-xs text-muted-foreground">
+              Nomi remembers your last tone.
+            </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
@@ -107,12 +132,16 @@ export function EmailComposer() {
           </div>
 
           <Button
-            className="w-full gap-2"
-            disabled={!context.trim() || isLoading}
+            className="w-full gap-2 transition-transform duration-200 hover:scale-[1.01]"
+            disabled={!context.trim() || run.isLoading}
             onClick={() => generate()}
           >
-            <Wand2 className="size-4" />
-            {isLoading ? "Composing…" : "Compose draft"}
+            {run.isLoading ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Wand2 className="size-4" />
+            )}
+            {run.isLoading ? "Thinking with Nomi…" : "Compose draft"}
           </Button>
           <p className="text-xs leading-relaxed text-muted-foreground">
             nomi never sends anything for you. You stay the author.
@@ -121,10 +150,15 @@ export function EmailComposer() {
 
         <OutputPanel
           title="Draft"
-          value={output}
-          onChange={setOutput}
-          onRegenerate={regenerate}
-          isLoading={isLoading}
+          value={run.output}
+          onChange={run.setOutput}
+          onRegenerate={run.regenerate}
+          isLoading={run.isLoading}
+          error={run.error}
+          onRetry={run.regenerate}
+          isFavorite={run.isFavorite}
+          onToggleFavorite={run.toggleFavorite}
+          canFavorite={Boolean(run.entryId)}
           emptyHint="Add your key points and pick a tone — your draft will appear here, fully editable."
         />
       </div>
